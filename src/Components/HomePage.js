@@ -9,13 +9,17 @@ const HomePage = () => {
   const [error, setError] = useState('');
   const [status, setStatus] = useState('Idle');
   const [timer, setTimer] = useState(0);
-  const [responseText, setResponseText] = useState(''); // New state for response
+  const [responseText, setResponseText] = useState(''); // State for response
+  const [treeImageUrl, setTreeImageUrl] = useState(''); // State for tree image URL
+  const [blastResultUrl, setBlastResultUrl] = useState(''); // State for BLAST result URL
 
   const handleFindClick = async () => {
     setLoading(true);
     setError('');
     setTimer(0);
     setResponseText(''); // Reset response text
+    setTreeImageUrl(''); // Reset tree image URL
+    setBlastResultUrl(''); // Reset BLAST result URL
 
     try {
       const intervalId = setInterval(() => {
@@ -37,8 +41,9 @@ const HomePage = () => {
 
       if (response.ok) {
         setStatus('Completed');
-        // Open the result in a new tab
         setResponseText(data.response); // Set response text
+        setTreeImageUrl(`http://localhost:5000${data.tree_image_url}`); // Set tree image URL
+        setBlastResultUrl(`http://localhost:5000${data.file_url}`); // Set BLAST result URL
       } else {
         setError(`Error: ${data.error}`);
       }
@@ -50,9 +55,13 @@ const HomePage = () => {
   };
 
   const fetchStatus = async () => {
-    const response = await fetch('http://localhost:5000/status');
-    const data = await response.json();
-    setStatus(data.status);
+    try {
+      const response = await fetch('http://localhost:5000/status');
+      const data = await response.json();
+      setStatus(data.status);
+    } catch (error) {
+      console.error('Failed to fetch status:', error);
+    }
   };
 
   useEffect(() => {
@@ -104,6 +113,20 @@ const HomePage = () => {
         <div className="response-container">
           <h2>Generated Response:</h2>
           <p>{responseText}</p>
+        </div>
+      )}
+
+      {treeImageUrl && (
+        <div className="tree-container">
+          <h2>Phylogenetic Tree:</h2>
+          <img src={treeImageUrl} alt="Phylogenetic Tree" className="tree-image" />
+        </div>
+      )}
+
+      {blastResultUrl && (
+        <div className="blast-result-container">
+          <h2>BLAST Result:</h2>
+          <a href={blastResultUrl} target="_blank" rel="noopener noreferrer">View Full BLAST Result</a>
         </div>
       )}
     </div>
