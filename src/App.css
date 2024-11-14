@@ -1,38 +1,136 @@
-.App {
+.homepage-container {
   text-align: center;
-}
-
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-
-.App-header {
-  background-color: #282c34;
+  padding: 30px;
+  background-color: #f0f4f8;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+  justify-content: flex-start;
 }
 
-.App-link {
-  color: #61dafb;
+.homepage-title {
+  font-size: 2.8rem;
+  color: #2c3e50;
+  margin-bottom: 25px;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
+.form-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+  max-width: 650px;
+  margin-bottom: 30px;
+}
+
+.fasta-input,
+.select-blast-type,
+.select-database,
+.find-button {
+  padding: 12px;
+  font-size: 1.1rem;
+  border-radius: 6px;
+  border: 1px solid #b0c4de;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.fasta-input {
+  resize: vertical;
+  height: 70px;
+}
+
+.select-blast-type,
+.select-database {
+  background-color: #fff;
+  cursor: pointer;
+}
+
+.find-button {
+  background-color: #007bff;
+  color: #fff;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.2s;
+}
+
+.find-button:hover {
+  background-color: #0056b3;
+  transform: scale(1.05);
+}
+
+.find-button:disabled {
+  background-color: #c0c0c0;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.status-container {
+  margin-top: 20px;
+  font-size: 1.3rem;
+  color: #555;
+}
+
+.error-container {
+  margin-top: 25px;
+  color: #d9534f;
+  font-size: 1.2rem;
+  border: 1px solid #d9534f;
+  padding: 15px;
+  border-radius: 6px;
+  background-color: #f8d7da;
+  max-width: 650px;
+  width: 100%;
+  text-align: left;
+}
+
+.response-container {
+  margin-top: 30px;
+  padding: 25px;
+  background-color: #ffffff;
+  border: 1px solid #ced4da;
+  border-radius: 8px;
+  width: 100%;
+  max-width: 650px;
+  text-align: left;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.response-container h2 {
+  color: #2c3e50;
+  margin-bottom: 15px;
+  font-size: 1.5rem;
+}
+
+.response-container p {
+  font-size: 1.1rem;
+  color: #555;
+  line-height: 1.6;
+}
+
+@media (max-width: 768px) {
+  .homepage-title {
+    font-size: 2.2rem;
   }
-  to {
-    transform: rotate(360deg);
+
+  .form-container,
+  .response-container {
+    padding: 15px;
+  }
+
+  .find-button {
+    font-size: 1rem;
+  }
+
+  .status-container {
+    font-size: 1.1rem;
+  }
+
+  .response-container h2 {
+    font-size: 1.3rem;
+  }
+
+  .response-container p {
+    font-size: 1rem;
   }
 }

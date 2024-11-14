@@ -7,15 +7,15 @@ const HomePage = () => {
   const [database, setDatabase] = useState('nt');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [summary, setSummary] = useState('');
   const [status, setStatus] = useState('Idle');
   const [timer, setTimer] = useState(0);
+  const [responseText, setResponseText] = useState(''); // New state for response
 
   const handleFindClick = async () => {
     setLoading(true);
     setError('');
-    setSummary('');
     setTimer(0);
+    setResponseText(''); // Reset response text
 
     try {
       const intervalId = setInterval(() => {
@@ -36,7 +36,9 @@ const HomePage = () => {
       const data = await response.json();
 
       if (response.ok) {
-        setSummary(data.summary);
+        setStatus('Completed');
+        // Open the result in a new tab
+        setResponseText(data.response); // Set response text
       } else {
         setError(`Error: ${data.error}`);
       }
@@ -62,7 +64,7 @@ const HomePage = () => {
 
   return (
     <div className="homepage-container">
-      <h1 className="homepage-title">Environmental Source Finder</h1>
+      <h1 className="homepage-title">BLAST Search Tool</h1>
       <div className="form-container">
         <input
           className="fasta-input"
@@ -98,10 +100,10 @@ const HomePage = () => {
 
       {error && <div className="error-container"><p>{error}</p></div>}
 
-      {summary && (
-        <div className="summary-container">
-          <h2>Summary:</h2>
-          <p>{summary}</p>
+      {responseText && (
+        <div className="response-container">
+          <h2>Generated Response:</h2>
+          <p>{responseText}</p>
         </div>
       )}
     </div>
