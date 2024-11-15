@@ -9,23 +9,25 @@ const HomePage = () => {
   const [error, setError] = useState('');
   const [status, setStatus] = useState('Idle');
   const [timer, setTimer] = useState(0);
-  const [responseText, setResponseText] = useState(''); // State for response
-  const [treeImageUrl, setTreeImageUrl] = useState(''); // State for tree image URL
-  const [blastResultUrl, setBlastResultUrl] = useState(''); // State for BLAST result URL
+  const [responseText, setResponseText] = useState('');
+  const [treeHtmlUrl, setTreeHtmlUrl] = useState('');
+  const [blastResultUrl, setBlastResultUrl] = useState('');
+  const [topBlastResults, setTopBlastResults] = useState([]); // State for top 10 BLAST results
 
   const handleFindClick = async () => {
     setLoading(true);
     setError('');
     setTimer(0);
-    setResponseText(''); // Reset response text
-    setTreeImageUrl(''); // Reset tree image URL
-    setBlastResultUrl(''); // Reset BLAST result URL
+    setResponseText('');
+    setTreeHtmlUrl('');
+    setBlastResultUrl('');
+    setTopBlastResults([]);
 
     try {
       const intervalId = setInterval(() => {
         setTimer((prev) => prev + 1);
         fetchStatus();
-      }, 1000); // Update every second
+      }, 1000);
 
       const response = await fetch('http://localhost:5000/blast', {
         method: 'POST',
@@ -41,9 +43,10 @@ const HomePage = () => {
 
       if (response.ok) {
         setStatus('Completed');
-        setResponseText(data.response); // Set response text
-        setTreeImageUrl(`http://localhost:5000${data.tree_image_url}`); // Set tree image URL
-        setBlastResultUrl(`http://localhost:5000${data.file_url}`); // Set BLAST result URL
+        setResponseText(data.response);
+        setTreeHtmlUrl(`http://localhost:5000${data.tree_image_url}`);
+        setBlastResultUrl(`http://localhost:5000${data.file_url}`);
+        setTopBlastResults(data.top_hits || []); // Set top 10 BLAST results
       } else {
         setError(`Error: ${data.error}`);
       }
@@ -111,21 +114,40 @@ const HomePage = () => {
 
       {responseText && (
         <div className="response-container">
-          <h2>Source of collection:</h2>
+          <h2>Source of Collection:</h2>
           <p>{responseText}</p>
         </div>
       )}
 
-      {treeImageUrl && (
+      {topBlastResults.length > 0 && (
+        <div className="top-blast-results-container">
+          <h2>Top 10 BLAST Results:</h2>
+          <ul>
+            {topBlastResults.map((result, index) => (
+              <li key={index} className="blast-result-item">
+                <p><strong>Title:</strong> {result.title}</p>
+                <p><strong>Author/Publication Link:</strong> <a href={result.publicationLink} target="_blank" rel="noopener noreferrer">{result.publicationLink}</a></p>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {treeHtmlUrl && (
         <div className="tree-container">
           <h2>Phylogenetic Tree:</h2>
-          <img src={treeImageUrl} alt="Phylogenetic Tree" className="tree-image" />
+          <iframe
+            src={treeHtmlUrl}
+            title="Phylogenetic Tree"
+            className="tree-iframe"
+            frameBorder="0"
+          ></iframe>
         </div>
       )}
 
       {blastResultUrl && (
         <div className="blast-result-container">
-          <h2>BLAST Result:</h2>
+          <h2>Full BLAST Result:</h2>
           <a href={blastResultUrl} target="_blank" rel="noopener noreferrer">View Full BLAST Result</a>
         </div>
       )}
