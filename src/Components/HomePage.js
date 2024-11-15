@@ -73,12 +73,12 @@ const HomePage = () => {
 
   return (
     <div className="homepage-container">
-      <h1 className="homepage-title">BLAST Search Tool</h1>
+      <h1 className="homepage-title">Ascension Number Search Tool</h1>
       <div className="form-container">
         <input
           className="fasta-input"
           type="text"
-          placeholder="Enter FASTA"
+          placeholder="Enter Ascension Number"
           value={fasta}
           onChange={(e) => setFasta(e.target.value)}
         />
@@ -111,7 +111,7 @@ const HomePage = () => {
 
       {responseText && (
         <div className="response-container">
-          <h2>Generated Response:</h2>
+          <h2>Source of collection:</h2>
           <p>{responseText}</p>
         </div>
       )}
