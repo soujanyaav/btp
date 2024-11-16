@@ -1,15 +1,31 @@
 /* Container styling */
 .homepage-container {
   display: flex;
-  flex-direction: column;
   justify-content: center;
   align-items: center;
   padding: 20px;
-  background-color: #f0f8ff;
+  background-size: cover;
+  background-position: center center;
+  background-attachment: fixed;
   min-height: 100vh;
   font-family: 'Arial', sans-serif;
 }
 
+/* Content box for better contrast */
+.content-box {
+  background-color: rgba(255, 255, 255, 0.9);
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+  max-width: 1200px;
+  width: 100%;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+}
+
+/* Title styling */
 .homepage-title {
   font-size: 2.5rem;
   margin-bottom: 20px;
@@ -28,7 +44,7 @@
 }
 
 /* Input for FASTA sequence */
-.fasta-input {
+.fasta-input, .select-blast-type, .select-database {
   width: 100%;
   padding: 10px;
   margin-bottom: 10px;
@@ -39,25 +55,7 @@
   transition: border-color 0.3s ease;
 }
 
-.fasta-input:focus {
-  border-color: #3498db;
-}
-
-/* Dropdown styling */
-.select-blast-type, .select-database {
-  width: 100%;
-  padding: 10px;
-  margin-bottom: 10px;
-  font-size: 1rem;
-  border: 2px solid #ccc;
-  border-radius: 5px;
-  background-color: #fff;
-  cursor: pointer;
-  outline: none;
-  transition: border-color 0.3s ease;
-}
-
-.select-blast-type:focus, .select-database:focus {
+.fasta-input:focus, .select-blast-type:focus, .select-database:focus {
   border-color: #3498db;
 }
 
@@ -84,18 +82,12 @@
   margin-top: 20px;
   color: #2c3e50;
   font-size: 1rem;
-  text-align: center;
-}
-
-.status-container p {
-  margin: 5px 0;
 }
 
 /* Error container styling */
 .error-container {
   margin-top: 20px;
   color: #e74c3c;
-  font-size: 1rem;
   background-color: #fbeaea;
   padding: 10px;
   border: 1px solid #e74c3c;
@@ -106,89 +98,54 @@
 /* Response container styling */
 .response-container {
   margin-top: 30px;
-  width: 100%;
-  max-width: 600px;
+  width: 785px;
   background-color: #fff;
   padding: 15px;
   border: 1px solid #ddd;
   border-radius: 5px;
   color: #333;
-  font-size: 1rem;
-  line-height: 1.5;
   box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
-}
-
-.response-container h2 {
-  font-size: 1.5rem;
-  color: #28a745;
-  margin-bottom: 10px;
-}
-
-.response-container p {
-  margin: 0;
 }
 
 /* Top BLAST results container styling */
 .top-blast-results-container {
   margin-top: 30px;
-  width: 100%;
-  max-width: 800px;
+  width: 785px;
   background-color: #fff;
   padding: 15px;
   border: 1px solid #ddd;
   border-radius: 5px;
   color: #333;
-  font-size: 1rem;
-  line-height: 1.5;
   box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
-}
-
-.top-blast-results-container h2 {
-  font-size: 1.5rem;
-  color: #2c3e50;
-  margin-bottom: 10px;
 }
 
 .blast-result-item {
   margin-bottom: 15px;
 }
 
-.blast-result-item p {
-  margin: 5px 0;
-}
-
 /* Tree container styling */
 .tree-container {
+  display: flex;
+  justify-content: center; /* Center the iframe horizontally */
   margin-top: 30px;
-  text-align: center;
-  width: 100%; /* Full container width */
-}
-
-.tree-container h2 {
-  font-size: 1.5rem;
-  color: #2c3e50;
-  margin-bottom: 15px;
+  width: 100%;
 }
 
 .tree-container .tree-iframe {
   border: 1px solid #ddd;
   border-radius: 5px;
   box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
-  margin: 20px auto; /* Center the iframe */
-  width: 100%; /* Full width */
-  max-width: 1200px; /* Maximum width for large screens */
-  height: 700px; /* Height adjustment */
+  width: 90%; /* Set a fixed width or a percentage for better control */
+  max-width: 1400px; /* Increase the max-width to make it wider */
+  min-width: 815px; /* Ensure a minimum width for smaller screens */
+  height: 518px;
 }
+
 
 /* BLAST result container styling */
 .blast-result-container {
   margin-top: 20px;
   text-align: center;
-}
-
-.blast-result-container h2 {
-  font-size: 1.5rem;
-  color: #2c3e50;
 }
 
 .blast-result-container a {
