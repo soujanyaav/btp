@@ -5,7 +5,7 @@ import backgroundImage from '../assets/BG.jpg';
 // Get API URL from environment variables or use localhost as fallback
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
-// Updated fetch function with better error handling and CORS options
+// Improved fetch function with better error handling and CORS options
 const fetchWithCORS = async (url, options = {}) => {
   console.log(`Making request to: ${url}`);
   
@@ -47,6 +47,8 @@ const fetchWithCORS = async (url, options = {}) => {
     return response;
   } catch (error) {
     console.error(`Fetch error for ${url}:`, error);
+    console.error("Error name:", error.name);
+    console.error("Error message:", error.message);
     throw error;
   }
 };
@@ -63,11 +65,57 @@ const HomePage = () => {
   const [treeHtmlUrl, setTreeHtmlUrl] = useState('');
   const [blastResultUrl, setBlastResultUrl] = useState('');
   const [topBlastResults, setTopBlastResults] = useState([]);
+  const [requestSent, setRequestSent] = useState(false);
+  const [statusIntervalId, setStatusIntervalId] = useState(null);
 
   useEffect(() => {
     // Log API URL on component mount for debugging
     console.log("Using API URL:", API_URL);
   }, []);
+
+  // This effect handles clean-up for the status polling interval
+  useEffect(() => {
+    return () => {
+      if (statusIntervalId) {
+        clearInterval(statusIntervalId);
+      }
+    };
+  }, [statusIntervalId]);
+
+  // This effect polls for results when request is sent but not yet complete
+  useEffect(() => {
+    if (requestSent && loading) {
+      const pollForResults = async () => {
+        try {
+          const response = await fetchWithCORS(`${API_URL}/results`);
+          const data = await response.json();
+          
+          if (data.status === 'completed' && data.results) {
+            setLoading(false);
+            setRequestSent(false);
+            setStatus('Completed');
+            
+            // Process the results
+            setResponseText(data.results.response);
+            setTreeHtmlUrl(`${API_URL}${data.results.tree_image_url}`);
+            setBlastResultUrl(`${API_URL}${data.results.file_url}`);
+            setTopBlastResults(data.results.top_hits || []);
+            
+            // Clear the polling interval
+            if (statusIntervalId) {
+              clearInterval(statusIntervalId);
+              setStatusIntervalId(null);
+            }
+          }
+        } catch (error) {
+          console.error('Failed to poll for results:', error);
+        }
+      };
+      
+      // Try once immediately
+      pollForResults();
+    }
+  }, [requestSent, loading, API_URL, statusIntervalId]);
 
   const handleFindClick = async () => {
     setLoading(true);
@@ -77,57 +125,99 @@ const HomePage = () => {
     setTreeHtmlUrl('');
     setBlastResultUrl('');
     setTopBlastResults([]);
+    setRequestSent(false);
+
+    // Set up status polling
+    const intervalId = setInterval(() => {
+      setTimer((prev) => prev + 1);
+      fetchStatus();
+    }, 1000);
+    
+    setStatusIntervalId(intervalId);
 
     try {
-      const intervalId = setInterval(() => {
-        setTimer((prev) => prev + 1);
-        fetchStatus();
-      }, 1000);
-
-      // Updated fetch call using fetchWithCORS
+      // Send the initial request - this might take a while
       const response = await fetchWithCORS(`${API_URL}/blast`, {
         method: 'POST',
-        body: JSON.stringify({ sequence: fasta, blast_type: blastType, database: database }),
+        body: JSON.stringify({ 
+          sequence: fasta, 
+          blast_type: blastType, 
+          database: database 
+        }),
       });
 
-      clearInterval(intervalId);
+      // Mark that we've sent the request successfully
+      setRequestSent(true);
 
+      // Process immediate response if available
       const data = await response.json();
 
       if (response.ok) {
         setStatus('Completed');
         setResponseText(data.response);
-        // Update URLs to use API_URL instead of hardcoded localhost
         setTreeHtmlUrl(`${API_URL}${data.tree_image_url}`);
         setBlastResultUrl(`${API_URL}${data.file_url}`);
         setTopBlastResults(data.top_hits || []);
+        
+        // Clean up
+        clearInterval(intervalId);
+        setStatusIntervalId(null);
+        setLoading(false);
       } else {
         setError(`Error: ${data.error}`);
+        clearInterval(intervalId);
+        setStatusIntervalId(null);
+        setLoading(false);
       }
     } catch (error) {
-      setError(`Request failed: ${error.message}`);
-    } finally {
-      setLoading(false);
+      if (error.message.includes('Failed to fetch')) {
+        // This might be a timeout - the operation could still be running on the server
+        // Keep the loading state active but inform the user
+        setError("Server is processing your request. This may take several minutes depending on the BLAST search complexity. The page will update when results are ready.");
+        // Don't set loading to false here - we'll keep checking status
+      } else {
+        // For other errors, show the error and stop loading
+        setError(`Request failed: ${error.message}`);
+        clearInterval(intervalId);
+        setStatusIntervalId(null);
+        setLoading(false);
+      }
     }
   };
 
   const fetchStatus = async () => {
     try {
-      // Updated fetch call using fetchWithCORS
       const response = await fetchWithCORS(`${API_URL}/status`);
       const data = await response.json();
       setStatus(data.status);
+      
+      // If status indicates completion, try to fetch results
+      if (data.status === 'Completed' && requestSent) {
+        try {
+          const resultsResponse = await fetchWithCORS(`${API_URL}/results`);
+          const resultsData = await resultsResponse.json();
+          
+          if (resultsData && resultsData.response) {
+            setLoading(false);
+            setRequestSent(false);
+            setResponseText(resultsData.response);
+            setTreeHtmlUrl(`${API_URL}${resultsData.tree_image_url}`);
+            setBlastResultUrl(`${API_URL}${resultsData.file_url}`);
+            setTopBlastResults(resultsData.top_hits || []);
+            
+            if (statusIntervalId) {
+              clearInterval(statusIntervalId);
+              setStatusIntervalId(null);
+            }
+          }
+        } catch (resultsError) {
+          console.error('Failed to fetch results:', resultsError);
+        }
+      }
     } catch (error) {
       console.error('Failed to fetch status:', error);
     }
   };
-
-  useEffect(() => {
-    if (loading) {
-      const intervalId = setInterval(() => setTimer((prev) => prev + 1), 1000);
-      return () => clearInterval(intervalId);
-    }
-  }, [loading]);
 
   return (
     <div
@@ -167,6 +257,11 @@ const HomePage = () => {
         <div className="status-container">
           <p>Status: {status}</p>
           <p>Elapsed Time: {timer}s</p>
+          {loading && requestSent && (
+            <p className="info-message">
+              BLAST searches can take several minutes. Please be patient...
+            </p>
+          )}
         </div>
 
         {error && <div className="error-container"><p>{error}</p></div>}
