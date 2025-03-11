@@ -2,6 +2,9 @@ import React, { useState, useEffect } from 'react';
 import './HomePage.css';
 import backgroundImage from '../assets/BG.jpg';
 
+// Get API URL from environment variables or use localhost as fallback
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+
 const HomePage = () => {
   const [fasta, setFasta] = useState('');
   const [blastType, setBlastType] = useState('blastn');
@@ -30,7 +33,8 @@ const HomePage = () => {
         fetchStatus();
       }, 1000);
 
-      const response = await fetch('http://localhost:5000/blast', {
+      // Updated fetch call with API_URL environment variable
+      const response = await fetch(`${API_URL}/blast`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -45,8 +49,9 @@ const HomePage = () => {
       if (response.ok) {
         setStatus('Completed');
         setResponseText(data.response);
-        setTreeHtmlUrl(`http://localhost:5000${data.tree_image_url}`);
-        setBlastResultUrl(`http://localhost:5000${data.file_url}`);
+        // Update URLs to use API_URL instead of hardcoded localhost
+        setTreeHtmlUrl(`${API_URL}${data.tree_image_url}`);
+        setBlastResultUrl(`${API_URL}${data.file_url}`);
         setTopBlastResults(data.top_hits || []);
       } else {
         setError(`Error: ${data.error}`);
@@ -60,7 +65,8 @@ const HomePage = () => {
 
   const fetchStatus = async () => {
     try {
-      const response = await fetch('http://localhost:5000/status');
+      // Updated fetch call with API_URL environment variable
+      const response = await fetch(`${API_URL}/status`);
       const data = await response.json();
       setStatus(data.status);
     } catch (error) {
