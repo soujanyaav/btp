@@ -5,6 +5,52 @@ import backgroundImage from '../assets/BG.jpg';
 // Get API URL from environment variables or use localhost as fallback
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
+// Updated fetch function with better error handling and CORS options
+const fetchWithCORS = async (url, options = {}) => {
+  console.log(`Making request to: ${url}`);
+  
+  // Add default headers including CORS-related ones
+  const defaultOptions = {
+    headers: {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+    },
+    // Ensure credentials aren't sent for cross-origin requests
+    credentials: 'omit',
+    mode: 'cors'
+  };
+  
+  // Merge with user options
+  const fetchOptions = {
+    ...defaultOptions,
+    ...options,
+    headers: {
+      ...defaultOptions.headers,
+      ...(options.headers || {})
+    }
+  };
+  
+  try {
+    const response = await fetch(url, fetchOptions);
+    
+    // Log response details for debugging
+    console.log(`Response status: ${response.status}`);
+    console.log(`Response headers:`, Object.fromEntries([...response.headers]));
+    
+    // Check if the request was successful
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`Error response: ${errorText}`);
+      throw new Error(`Request failed with status ${response.status}: ${errorText}`);
+    }
+    
+    return response;
+  } catch (error) {
+    console.error(`Fetch error for ${url}:`, error);
+    throw error;
+  }
+};
+
 const HomePage = () => {
   const [fasta, setFasta] = useState('');
   const [blastType, setBlastType] = useState('blastn');
@@ -17,6 +63,11 @@ const HomePage = () => {
   const [treeHtmlUrl, setTreeHtmlUrl] = useState('');
   const [blastResultUrl, setBlastResultUrl] = useState('');
   const [topBlastResults, setTopBlastResults] = useState([]);
+
+  useEffect(() => {
+    // Log API URL on component mount for debugging
+    console.log("Using API URL:", API_URL);
+  }, []);
 
   const handleFindClick = async () => {
     setLoading(true);
@@ -33,12 +84,9 @@ const HomePage = () => {
         fetchStatus();
       }, 1000);
 
-      // Updated fetch call with API_URL environment variable
-      const response = await fetch(`${API_URL}/blast`, {
+      // Updated fetch call using fetchWithCORS
+      const response = await fetchWithCORS(`${API_URL}/blast`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
         body: JSON.stringify({ sequence: fasta, blast_type: blastType, database: database }),
       });
 
@@ -65,8 +113,8 @@ const HomePage = () => {
 
   const fetchStatus = async () => {
     try {
-      // Updated fetch call with API_URL environment variable
-      const response = await fetch(`${API_URL}/status`);
+      // Updated fetch call using fetchWithCORS
+      const response = await fetchWithCORS(`${API_URL}/status`);
       const data = await response.json();
       setStatus(data.status);
     } catch (error) {
